@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UrlTest extends TestCase
@@ -43,7 +44,7 @@ class UrlTest extends TestCase
         $response = $this->createUrl($url);
 
         $this->assertEquals($response['code'], $url['code']);
-        $this->assertContains($url['code'], $response['short_url']);
+        $this->assertStringContainsString($url['code'], $response['short_url']);
     }
 
     /** @test */
@@ -96,5 +97,88 @@ class UrlTest extends TestCase
         $url = $this->createUrl();
 
         $this->assertEquals($url['counter'], 0);
+    }
+
+    /** @test */
+    public function title_and_description_are_fetched_on_creation()
+    {
+        $url = $this->createUrl();
+
+        $this->assertEquals($url['title'], 'a test title');
+        $this->assertEquals($url['description'], 'a test description');
+    }
+
+    /** @test */
+    public function an_extension_could_be_blacklisted()
+    {
+        \Config::set('shorturl.blacklist', '.test');
+
+        $url = ['url' => 'https://laravel.test'];
+
+        $response = $this->createUrl($url);
+
+        $this->assertArrayHasKey('url', $response['errors']);
+    }
+
+    /** @test */
+    public function a_keyword_could_be_blacklisted()
+    {
+        \Config::set('shorturl.blacklist', 'test');
+
+        $url = ['url' => 'https://test.com'];
+
+        $response = $this->createUrl($url);
+
+        $this->assertArrayHasKey('url', $response['errors']);
+    }
+
+    /** @test */
+    public function an_url_could_be_blacklisted()
+    {
+        \Config::set('shorturl.blacklist', '//test.com');
+
+        $url = ['url' => 'https://test.com'];
+
+        $response = $this->createUrl($url);
+
+        $this->assertArrayHasKey('url', $response['errors']);
+    }
+
+    /** @test */
+    public function an_expiration_date_could_be_set()
+    {
+        $url = ['url' => 'https://laravel.com', 'code' => 'abcde', 'expires_at' => Carbon::now()->add('PT10M')];
+
+        $response = $this->createUrl($url);
+
+        $this->assertNotNull($response['expires_at']);
+    }
+
+    /** @test */
+    public function an_expiration_date_is_optional()
+    {
+        $response = $this->createUrl();
+
+        $this->assertNull($response['expires_at']);
+    }
+
+    /** @test */
+    public function an_expiration_date_must_be_a_valid_date()
+    {
+        $url = ['url' => 'https://laravel.com', 'expires_at' => 'abcde'];
+
+        $response = $this->createUrl($url);
+
+        $this->assertArrayHasKey('expires_at', $response['errors']);
+    }
+
+    /** @test */
+    public function an_expiration_date_must_be_in_the_future()
+    {
+        $url = ['url' => 'https://laravel.com', 'expires_at' => Carbon::now()->sub('PT10M')];
+
+        $response = $this->createUrl($url);
+
+        $this->assertArrayHasKey('expires_at', $response['errors']);
     }
 }

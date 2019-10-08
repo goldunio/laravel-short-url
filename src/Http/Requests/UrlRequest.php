@@ -2,6 +2,7 @@
 
 namespace Gallib\ShortUrl\Http\Requests;
 
+use Gallib\ShortUrl\Rules\Blacklist;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UrlRequest extends FormRequest
@@ -30,8 +31,9 @@ class UrlRequest extends FormRequest
         }
 
         return [
-            'url'  => 'required|url',
+            'url'  => ['required', 'url', new Blacklist()],
             'code' => 'max:255'.$uniqueCode,
+            'expires_at' => 'date|after:now|nullable',
         ];
     }
 
@@ -40,11 +42,11 @@ class UrlRequest extends FormRequest
      *
      * @return array
      */
-    protected function validationData()
+    public function validationData()
     {
         $data = parent::validationData();
 
-        $modify = isset($data['code']) ? ['code' => str_slug($data['code'])] : [];
+        $modify = isset($data['code']) ? ['code' => \Str::slug($data['code'])] : [];
 
         return array_merge($data, $modify);
     }
