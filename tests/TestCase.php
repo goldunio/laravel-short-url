@@ -3,7 +3,9 @@
 namespace Tests;
 
 use Gallib\ShortUrl\Parsers\UrlParser;
+use Illuminate\Database\Schema\Blueprint;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Tests\Stubs\User;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -13,13 +15,14 @@ abstract class TestCase extends OrchestraTestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->setUpDatabase($this->app);
     }
 
     /**
      * Define environment setup.
      *
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
@@ -33,6 +36,23 @@ abstract class TestCase extends OrchestraTestCase
         ]);
 
         \ShortUrl::routes();
+
+        $authProvider = config('auth.guards.api.provider');
+        $app['config']->set("auth.providers.{$authProvider}.model", User::class);
+    }
+
+    /**
+     * Set up the database.
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     */
+    protected function setUpDatabase($app)
+    {
+        $app['db']->connection()->getSchemaBuilder()->create('users', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -41,8 +61,7 @@ abstract class TestCase extends OrchestraTestCase
      * In a normal app environment these would be added to the 'providers' array in
      * the config/app.php file.
      *
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
     protected function getPackageProviders($app)
@@ -58,8 +77,7 @@ abstract class TestCase extends OrchestraTestCase
      * aliased facade, you should add the alias here, along with aliases for
      * facades upon which your package depends, e.g. Cartalyst/Sentry.
      *
-     * @param \Illuminate\Foundation\Application $app
-     *
+     * @param  \Illuminate\Foundation\Application  $app
      * @return array
      */
     protected function getPackageAliases($app)
@@ -123,5 +141,16 @@ abstract class TestCase extends OrchestraTestCase
         $parameters = array_merge(['url' => 'https://laravel.com'], $parameters);
 
         return $this->postJson(route('shorturl.url.store'), $parameters)->json();
+    }
+
+    /**
+     * Create a user.
+     *
+     * @param  array  $parameters
+     * @return User
+     */
+    public function createUser(array $parameters = [])
+    {
+        return User::create(['name' => 'Test']);
     }
 }

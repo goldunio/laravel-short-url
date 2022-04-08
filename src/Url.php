@@ -23,6 +23,7 @@ class Url extends Model
         'url',
         'code',
         'expires_at',
+        'user_id',
     ];
 
     /**
@@ -37,7 +38,7 @@ class Url extends Model
     /**
      * Boot the model.
      *
-     * @return  void
+     * @return void
      */
     protected static function boot()
     {
@@ -71,5 +72,23 @@ class Url extends Model
         $expiresAt = new Carbon($this->expires_at);
 
         return ! $expiresAt->isFuture();
+    }
+
+    /**
+     * Get the user that created the url.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user()
+    {
+        $provider = config('auth.guards.web.provider');
+
+        $userModel = config("auth.providers.{$provider}.model");
+
+        if (! class_exists($userModel)) {
+            throw new \Exception('User model not found');
+        }
+
+        return $this->belongsTo($userModel);
     }
 }

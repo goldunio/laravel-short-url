@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 
-class AddCounterToUrls extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -16,4 +16,4 @@ class AddCounterToUrls extends Migration
             $table->unsignedInteger('counter')->default(0)->after('code');
         });
     }
-}
+};

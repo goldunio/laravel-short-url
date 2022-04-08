@@ -3,10 +3,10 @@
 namespace Gallib\ShortUrl\Http\Controllers;
 
 use Carbon\Carbon;
-use Gallib\ShortUrl\Url;
-use Illuminate\Routing\Controller;
 use Gallib\ShortUrl\Http\Requests\UrlRequest;
 use Gallib\ShortUrl\Http\Responses\UrlResponse;
+use Gallib\ShortUrl\Url;
+use Illuminate\Routing\Controller;
 
 class UrlController extends Controller
 {
@@ -35,15 +35,15 @@ class UrlController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Gallib\ShortUrl\Http\Requests\UrlRequest $request
-     *
+     * @param  \Gallib\ShortUrl\Http\Requests\UrlRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(UrlRequest $request)
     {
         $data = [
-            'url'  => $request->get('url'),
+            'url' => $request->get('url'),
             'code' => $request->get('code') ? \Str::slug($request->get('code')) : \Hasher::generate(),
+            'user_id' => optional(auth()->user())->id,
         ];
 
         if ($request->filled('expires_at')) {
@@ -82,8 +82,9 @@ class UrlController extends Controller
         \Cache::forget("url.{$url['code']}");
 
         $data = [
-            'url'  => $request->get('url'),
+            'url' => $request->get('url'),
             'code' => $request->get('code'),
+            'user_id' => optional(auth()->user())->id,
         ];
 
         if ($request->filled('expires_at')) {

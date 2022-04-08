@@ -14,8 +14,7 @@ class UrlResponse implements Responsable
     /**
      * Create a new instance.
      *
-     * @param \Gallib\ShortUrl\Url $url
-     *
+     * @param  \Gallib\ShortUrl\Url  $url
      * @return void
      */
     public function __construct($url)
@@ -26,8 +25,7 @@ class UrlResponse implements Responsable
     /**
      * Create an HTTP response that represents the object.
      *
-     * @param \Illuminate\Http\Request $request
-     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function toResponse($request)
@@ -44,6 +42,7 @@ class UrlResponse implements Responsable
                 'short_url'   => $shortUrl,
                 'counter'     => $this->url->counter,
                 'expires_at'  => $this->url->expires_at,
+                'user_id'     => optional($this->url->user)->id,
             ], 201);
         }
 

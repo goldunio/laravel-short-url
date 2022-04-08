@@ -2,10 +2,10 @@
 
 namespace Gallib\ShortUrl\Parsers;
 
-use GuzzleHttp\Client;
 use Gallib\ShortUrl\Url;
-use Symfony\Component\DomCrawler\Crawler;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Symfony\Component\DomCrawler\Crawler;
 
 class UrlParser
 {
@@ -22,7 +22,7 @@ class UrlParser
     /**
      * Create a new instance.
      *
-     * @param  \GuzzleHttp\Client $client
+     * @param  \GuzzleHttp\Client  $client
      * @return void
      */
     public function __construct(Client $client)
@@ -33,7 +33,7 @@ class UrlParser
     /**
      * Get body of given url.
      *
-     * @param  string $url
+     * @param  string  $url
      * @return string
      */
     public function getBody($url)
@@ -51,7 +51,7 @@ class UrlParser
     /**
      * Parse the url to collect additionnal informations.
      *
-     * @param  \Gallib\ShortUrl\Url $url
+     * @param  \Gallib\ShortUrl\Url  $url
      * @return void
      */
     public function setUrlInfos(Url $url)
